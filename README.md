@@ -9,3 +9,5 @@ Python package wrapping over FANTOM and ENCODE labels for cis regulatory regions
 - [Link to roadmap cell_line to roadmap code map](https://egg2.wustl.edu/roadmap/data/byFileType/metadata/EID_metadata.tab)
 - [Link to old ENCODE segmentation tracks](http://hgsv.washington.edu/cgi-bin/hgTrackUi?hgsid=2654871_pjNn3UAIBZ4mP640eon9AekZYGY2&g=hub_4_genomeSegmentation&hgTracksConfigPage=configure)
 - [Link to download paths for old ENCODE segmentation tracks](http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/)
+- [Link to Fantom Promoters](http://slidebase.binf.ku.dk/human_promoters/results)
+- [Link to Fantom Enhancers](http://slidebase.binf.ku.dk/human_enhancers/results)
