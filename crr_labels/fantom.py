@@ -20,51 +20,65 @@ def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict):
 
 def filter_promoters(cell_lines_names: pd.DataFrame, genome: str, info: Dict):
     download(info[genome]["promoters"], "fantom")
-    df = pd.read_csv(
+    download(info[genome]["promoters"], "fantom")
+    promoters = pd.read_csv(
         "fantom/{filename}".format(
             filename=info[genome]["promoters"].split("/")[-1]
         ),
         compression="gzip",
         comment="#",
         sep="\t"
-    )
-    df.columns = [
-        c.split(".")[2] if c.startswith("tpm") else c for c in df.columns
+    ).drop(index=[0, 1])
+    promoters.columns = [
+        c.split(".")[2] if c.startswith("tpm") else c for c in promoters.columns
     ]
-
-    df = df.drop(index=[0, 1])
-    df = df[df.description.str.endswith("end")]
-    annotations = df["00Annotation"].str.split(":", expand=True)
-    regions = annotations[1].str.split(",", expand=True)
-    annotations = pd.concat([
-        annotations[0],
-        regions[0].str.split(r"\.\.", expand=True),
-        regions[1]
-    ], axis=1)
-    annotations.columns = ["chromosome", "start", "end", "strand"]
-    df = pd.concat([
-        annotations,
-        df.drop(columns=[
-            "00Annotation",
-        ])
-    ], axis=1)
+    promoters_info = pd.read_csv(
+        "fantom/{filename}".format(
+            filename=info[genome]["promoters_info"].split("/")[-1]
+        ),
+        compression="gzip",
+        comment="#",
+        sep="\t",
+        header=None
+    )
+    promoters_info.columns = [
+        "chromosome",
+        "start",
+        "end",
+        "name",
+        "score",
+        "strand",
+        "thickStart",
+        "thickEnd",
+        "itemRgb"
+    ]
+    mask = promoters.description.str.endswith("end")
+    promoters = promoters[mask]
+    promoters_info = promoters_info[mask]
+    promoters["chromosome"] = promoters_info.chromosome
+    promoters["start"] = promoters_info.start
+    promoters["end"] = promoters_info.end
     for cell_line, group in cell_lines_names.groupby("cell_line"):
-        df[cell_line] = df[group.code].astype(float).mean(skipna=True, axis=1)
-    df = df.drop(columns=df.columns[df.columns.str.startswith("CNhs")])
-    return df
+        promoters[cell_line] = promoters[group.code].astype(float).mean(skipna=True, axis=1)
+    promoters = promoters.drop(columns=promoters.columns[promoters.columns.str.startswith("CNhs")])
+    return promoters
 
 
 def filter_enhancers(cell_lines_names: pd.DataFrame, genome: str, info: Dict, window_size:int, center_enhancer:str):
     download(info[genome]["enhancers"], "fantom")
     download(info[genome]["enhancers_info"], "fantom")
     enhancers = pd.read_csv(
-        "fantom/human_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz",
+        "fantom/{filename}".format(
+            filename=info[genome]["enhancers"].split("/")[-1]
+        ),
         compression="gzip",
         comment="#",
         sep="\t"
     ).drop(columns="Id")
     enhancers_info = pd.read_csv(
-        "fantom/human_permissive_enhancers_phase_1_and_2.bed.gz",
+        "fantom/{filename}".format(
+            filename=info[genome]["enhancers_info"].split("/")[-1]
+        ),
         compression="gzip",
         comment="#",
         sep="\t",
