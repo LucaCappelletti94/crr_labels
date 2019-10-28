@@ -60,7 +60,8 @@ setup(
     tests_require=test_deps,
     # Add here the package dependencies
     install_requires=[
-        "encodeproject"
+        "encodeproject",
+        "pandas"
     ],
     extras_require=extras,
 )
