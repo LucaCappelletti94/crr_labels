@@ -147,3 +147,8 @@ In the future more datasets containing labels with cis-regulatory regions will b
 .. _MCF7_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/300
 .. _MCF7_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/500
 .. _MCF7_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/1000
+
+.. _all_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/200
+.. _all_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/300
+.. _all_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/500
+.. _all_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/1000
