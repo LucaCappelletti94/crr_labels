@@ -1,1 +1,3 @@
-from .crr_labels import crr_labels
+from .fantom import fantom
+
+__all__ = ["fantom"]

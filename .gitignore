@@ -15,4 +15,5 @@ __pycache__
 .coverage*
 
 coverage.xml
-fantom
+fantom_data
+.ipynb*
