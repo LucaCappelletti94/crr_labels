@@ -33,13 +33,14 @@ To retrieve the FANTOM promoters you can proceed as follows:
     from crr_labels import fantom
 
     enhancers, promoters = fantom(
-        cell_lines=["HelaS3", "GM12878"],
-        window_size=200,
-        genome = "hg19",
-        center_enhancers = "peak",
-        enhancers_threshold = 0,
-        promoters_threshold = 5,
-        drop_always_inactive_rows = True
+        cell_lines=["HelaS3", "GM12878"], # list of cell lines to be considered.
+        window_size=200, # window size to use for the various regions.
+        genome = "hg19", # considered genome version. Currently supported only "hg19".
+        center_enhancers = "peak", # how to center the enhancer window, either around "peak" or the "center" of the region.
+        enhancers_threshold = 0, # activation threshold for the enhancers.
+        promoters_threshold = 5, # activation threshold for the promoters.
+        drop_always_inactive_rows = True, # whetever to drop the rows where no activation is detected for every rows.
+        nrows:int=None # the number of rows to read, usefull when testing pipelines for creating smaller datasets.
     )
 
 The library will download and parse the fantom project raw data and return two dataframes for the required cell lines.
