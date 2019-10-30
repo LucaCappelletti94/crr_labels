@@ -63,9 +63,8 @@ Some datasets are already available pre-processed.
 
 FANTOM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In the following links you can download the compressed promoters and encoders for the following cell lines:
 
-- `HelaS3 with inactive rows <>`_
+Work in progress...
 
 .. |travis| image:: https://travis-ci.org/LucaCappelletti94/crr_labels.png
    :target: https://travis-ci.org/LucaCappelletti94/crr_labels
