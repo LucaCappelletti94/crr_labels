@@ -66,15 +66,15 @@ FANTOM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 +----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
-| Windows sizes / Cell lines | All      | HelaS3          | GM12878       | HepG2       | K562       | A549       | MCF7       |
+| Windows sizes  | All      | HelaS3          | GM12878       | HepG2       | K562       | A549       | MCF7       |
 +============================+==========+=================+===============+=============+============+============+============+
-| 200 nucleotides            | all_200_ | HelaS3_200_     | GM12878_200_  | HepG2_200_  | K562_200_  | A549_200_  | MCF7_200_  |
+| 200            | all_200_ | HelaS3_200_     | GM12878_200_  | HepG2_200_  | K562_200_  | A549_200_  | MCF7_200_  |
 +----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
-| 300 nucleotides            | all_300_ | HelaS3_300_     | GM12878_300_  | HepG2_300_  | K562_300_  | A549_300_  | MCF7_300_  |
+| 300            | all_300_ | HelaS3_300_     | GM12878_300_  | HepG2_300_  | K562_300_  | A549_300_  | MCF7_300_  |
 +----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
-| 500 nucleotides            | all_500_ | HelaS3_500_     | GM12878_500_  | HepG2_500_  | K562_500_  | A549_500_  | MCF7_500_  |
+| 500            | all_500_ | HelaS3_500_     | GM12878_500_  | HepG2_500_  | K562_500_  | A549_500_  | MCF7_500_  |
 +----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
-| 1000 nucleotides           | all_1000_| HelaS3_1000_    | GM12878_1000_ | HepG2_1000_ | K562_1000_ | A549_1000_ | MCF7_1000_ |
+| 1000           | all_1000_| HelaS3_1000_    | GM12878_1000_ | HepG2_1000_ | K562_1000_ | A549_1000_ | MCF7_1000_ |
 +----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
 
 
@@ -148,7 +148,7 @@ In the future more datasets containing labels with cis-regulatory regions will b
 .. _MCF7_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/500
 .. _MCF7_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/1000
 
-.. _all_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/200
-.. _all_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/300
-.. _all_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/500
-.. _all_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_line/window_size/1000
+.. _all_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_lines/window_size/200
+.. _all_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_lines/window_size/300
+.. _all_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_lines/window_size/500
+.. _all_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/multiple_cell_lines/window_size/1000
