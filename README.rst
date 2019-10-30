@@ -59,12 +59,29 @@ The main steps are the following:
 
 Rendered datasets
 ----------------------------------
-Some datasets are already available pre-processed.
+Some datasets are already available pre-processed. See the tables below for more informations. If you think that another dataset could be
+useful as preprocessed do let me know and I will render it and add it to the tables.
 
 FANTOM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Work in progress...
++----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
+| Windows sizes / Cell lines | All      | HelaS3          | GM12878       | HepG2       | K562       | A549       | MCF7       |
++============================+==========+=================+===============+=============+============+============+============+
+| 200 nucleotides            | all_200_ | HelaS3_200_     | GM12878_200_  | HepG2_200_  | K562_200_  | A549_200_  | MCF7_200_  |
++----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
+| 300 nucleotides            | all_300_ | HelaS3_300_     | GM12878_300_  | HepG2_300_  | K562_300_  | A549_300_  | MCF7_300_  |
++----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
+| 500 nucleotides            | all_500_ | HelaS3_500_     | GM12878_500_  | HepG2_500_  | K562_500_  | A549_500_  | MCF7_500_  |
++----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
+| 1000 nucleotides           | all_1000_| HelaS3_1000_    | GM12878_1000_ | HepG2_1000_ | K562_1000_ | A549_1000_ | MCF7_1000_ |
++----------------------------+----------+-----------------+---------------+-------------+------------+------------+------------+
+
+
+Future works
+-----------------------------------
+In the future more datasets containing labels with cis-regulatory regions will be added to this project.
+
 
 .. |travis| image:: https://travis-ci.org/LucaCappelletti94/crr_labels.png
    :target: https://travis-ci.org/LucaCappelletti94/crr_labels
@@ -105,3 +122,28 @@ Work in progress...
 .. |code_climate_coverage| image:: https://api.codeclimate.com/v1/badges/7c18ec5176f2ebebef96/test_coverage
     :target: https://codeclimate.com/github/LucaCappelletti94/crr_labels/test_coverage
     :alt: Code Climate Coverate
+
+.. _HelaS3_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HelaS3/window_size/200
+.. _HelaS3_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HelaS3/window_size/300
+.. _HelaS3_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HelaS3/window_size/500
+.. _HelaS3_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HelaS3/window_size/1000
+.. _GM12878_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/GM12878/window_size/200
+.. _GM12878_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/GM12878/window_size/300
+.. _GM12878_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/GM12878/window_size/500
+.. _GM12878_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/GM12878/window_size/1000
+.. _HepG2_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HepG2/window_size/200
+.. _HepG2_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HepG2/window_size/300
+.. _HepG2_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HepG2/window_size/500
+.. _HepG2_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/HepG2/window_size/1000
+.. _K562_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/K562/window_size/200
+.. _K562_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/K562/window_size/300
+.. _K562_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/K562/window_size/500
+.. _K562_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/K562/window_size/1000
+.. _A549_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/A549/window_size/200
+.. _A549_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/A549/window_size/300
+.. _A549_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/A549/window_size/500
+.. _A549_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/A549/window_size/1000
+.. _MCF7_200: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/200
+.. _MCF7_300: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/300
+.. _MCF7_500: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/500
+.. _MCF7_1000: https://github.com/LucaCappelletti94/crr_labels/tree/master/preprocessed/cell_line/MCF7/window_size/1000
