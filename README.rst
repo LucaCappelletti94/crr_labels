@@ -47,7 +47,7 @@ Consider reading the method docstring for more id-depth informations about the m
 
 The main steps are the following:
 
-- The raw files are retrieved from the fantom dataset from the link specified in the `fantom_data.json file <add link>`_
+- The raw files are retrieved from the fantom dataset from the link specified in the `fantom_data.json file <https://github.com/LucaCappelletti94/crr_labels/blob/master/crr_labels/fantom_data.json>`_
 - The window for the enhancers and promoters are expanded or compressed to the given window size. In particular:
     - The enhancers window can either be centered on the region center with the "center" mode or around the "peak" with the "peak" mode.
     - The promoters window is upstream in the positive strand from the end of the promoter and downstream on the negative strand from the start of the promoter.
@@ -74,12 +74,12 @@ The main steps are the following:
     :target: https://coveralls.io/github/LucaCappelletti94/crr_labels?branch=master
     :alt: Coveralls Coverage
 
-.. |pip| image:: https://badge.fury.io/py/crr_labels.svg
-    :target: https://badge.fury.io/py/crr_labels
+.. |pip| image:: https://badge.fury.io/py/crr-labels.svg
+    :target: https://badge.fury.io/py/crr-labels
     :alt: Pypi project
 
-.. |downloads| image:: https://pepy.tech/badge/crr_labels
-    :target: https://pepy.tech/badge/crr_labels
+.. |downloads| image:: https://pepy.tech/badge/crr-labels
+    :target: https://pepy.tech/badge/crr-labels
     :alt: Pypi total project downloads 
 
 .. |codacy|  image:: https://api.codacy.com/project/badge/Grade/c0a7e110045a4d25933c65fe2014a33c
