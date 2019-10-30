@@ -55,6 +55,17 @@ The main steps are the following:
 - When multiple experiments are present for a cell line, for instance for "HelaS3", an average of the activation peaks is executed.
 - Optionally (and by default) the rows that are always inactive for the chosen cell lines are dropped. You can specify this behaviour using the parameter "drop_always_inactive_rows".
 
+
+Rendered datasets
+----------------------------------
+Some datasets are already available pre-processed.
+
+FANTOM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In the following links you can download the compressed promoters and encoders for the following cell lines:
+
+- `HelaS3 with inactive rows <>`_
+
 .. |travis| image:: https://travis-ci.org/LucaCappelletti94/crr_labels.png
    :target: https://travis-ci.org/LucaCappelletti94/crr_labels
    :alt: Travis CI build

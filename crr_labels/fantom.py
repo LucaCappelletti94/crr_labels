@@ -95,7 +95,8 @@ def filter_promoters(
     info: Dict,
     window_size: int,
     threshold: float,
-    drop_always_inactive_rows: bool = True
+    drop_always_inactive_rows: bool,
+    nrows:int
 ):
     """Return DataFrame containing the promoters filtered for given cell lines and adapted to given window size.
 
@@ -115,6 +116,8 @@ def filter_promoters(
         activation threshold.
     drop_always_inactive_rows:bool= True,
         whetever to drop the rows where no activation is detected for every rows.
+    nrows:int=None,
+        the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Returns
     ---------------------------------------
@@ -126,7 +129,8 @@ def filter_promoters(
             filename=info[genome]["promoters"].split("/")[-1]
         ),
         comment="#",
-        sep="\t"
+        sep="\t",
+        nrows=nrows
     ).drop(index=[0, 1])
     promoters = promoters.drop(columns=[
         c for c in promoters.columns
@@ -192,7 +196,8 @@ def filter_enhancers(
     window_size: int,
     center_mode: str,
     threshold: float,
-    drop_always_inactive_rows: bool = True
+    drop_always_inactive_rows: bool,
+    nrows: int
 ) -> pd.DataFrame:
     """Return DataFrame containing the enhancers filtered for given cell lines and adapted to given window size.
 
@@ -212,6 +217,8 @@ def filter_enhancers(
         activation threshold.
     drop_always_inactive_rows:bool= True,
         whetever to drop the rows where no activation is detected for every rows.
+    nrows:int=None,
+        the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Returns
     ---------------------------------------
@@ -223,7 +230,8 @@ def filter_enhancers(
             filename=info[genome]["enhancers"].split("/")[-1]
         ),
         comment="#",
-        sep="\t"
+        sep="\t",
+        nrows=nrows
     ).drop(columns="Id")
     coordinates = load_enhancers_coordinates(genome, info)
     if center_mode == "peak":
@@ -246,7 +254,8 @@ def fantom(
     center_enhancers: str = "peak",
     enhancers_threshold: float = 0,
     promoters_threshold: float = 5,
-    drop_always_inactive_rows: bool = True
+    drop_always_inactive_rows: bool = True,
+    nrows:int=None
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Runs the pipeline over the fantom raw CAGE data.
 
@@ -266,6 +275,8 @@ def fantom(
         activation threshold for the promoters.
     drop_always_inactive_rows:bool= True,
         whetever to drop the rows where no activation is detected for every rows.
+    nrows:int=None,
+        the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Raises
     ----------------------------------------
@@ -309,7 +320,8 @@ def fantom(
         window_size=window_size,
         center_mode=center_enhancers,
         threshold=enhancers_threshold,
-        drop_always_inactive_rows=drop_always_inactive_rows
+        drop_always_inactive_rows=drop_always_inactive_rows,
+        nrows=nrows
     ).reset_index(drop=True)
     promoters = filter_promoters(
         cell_lines=cell_lines,
@@ -318,6 +330,7 @@ def fantom(
         info=info,
         window_size=window_size,
         threshold=promoters_threshold,
-        drop_always_inactive_rows=drop_always_inactive_rows
+        drop_always_inactive_rows=drop_always_inactive_rows,
+        nrows=nrows
     ).reset_index(drop=True)
     return enhancers, promoters

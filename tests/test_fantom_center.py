@@ -7,7 +7,7 @@ from pandas.testing import assert_frame_equal
 
 
 def test_fantom_center():
-    enhancers, promoters = fantom(["HelaS3", "GM12878"], 200, center_enhancers="center")
+    enhancers, promoters = fantom(["HelaS3", "GM12878"], 200, center_enhancers="center", nrows=500)
     os.makedirs("tests/test_fantom_center", exist_ok=True)
     #enhancers.to_csv("tests/test_fantom_center/enhancers.csv", index=False)
     #promoters.to_csv("tests/test_fantom_center/promoters.csv", index=False)
