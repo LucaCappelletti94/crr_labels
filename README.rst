@@ -49,6 +49,7 @@ The main steps are the following:
 
 - The raw files are retrieved from the fantom dataset from the link specified in the `fantom_data.json file <https://github.com/LucaCappelletti94/crr_labels/blob/master/crr_labels/fantom_data.json>`_
 - The window for the enhancers and promoters are expanded or compressed to the given window size. In particular:
+
     - The enhancers window can either be centered on the region center with the "center" mode or around the "peak" with the "peak" mode.
     - The promoters window is upstream in the positive strand from the end of the promoter and downstream on the negative strand from the start of the promoter.
 - When multiple experiments are present for a cell line, for instance for "HelaS3", an average of the activation peaks is executed.
