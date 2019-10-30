@@ -1,6 +1,5 @@
 from crr_labels import fantom
 import pandas as pd
-import numpy as np
 import os
 from pandas.testing import assert_frame_equal
 
