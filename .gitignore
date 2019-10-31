@@ -16,4 +16,5 @@ __pycache__
 
 coverage.xml
 fantom_data
+roadmap_data
 .ipynb*

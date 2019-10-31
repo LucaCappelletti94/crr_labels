@@ -1,4 +1,4 @@
-from .utils import download, load_info
+from .utils import download, load_info, filter_required_cell_lines, validate_common_parameters, center_window, normalize_cell_lines, normalize_bed_file
 from typing import List, Dict, Tuple,  Union
 import pandas as pd
 
@@ -31,22 +31,16 @@ def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.Data
     cell_lines_names = df[0].str.split("cell line:", expand=True)
     mask = pd.notnull(cell_lines_names[1])
     cell_lines_names = cell_lines_names[mask]
-    df = pd.concat(
+    cell_lines_codes = pd.concat(
         objs=[
             cell_lines_names[0],
-            cell_lines_names[1].apply(lambda x: x.split("ENCODE")[0].strip()),
+            cell_lines_names[1].apply(lambda x: x.split("ENCODE")[0].strip()).str.upper(),
             df[mask][1],
         ],
         axis=1
     )
-    df.columns = ["tissue", "cell_line", "code"]
-    filtered_cell_lines = df[df.cell_line.isin(cell_lines)]
-    for cell_line in cell_lines:
-        if not filtered_cell_lines.cell_line.isin([cell_line]).any():
-            raise ValueError("Given cell line {cell_line} is not currently available.".format(
-                cell_line=cell_line
-            ))
-    return filtered_cell_lines
+    cell_lines_codes.columns = ["tissue", "cell_line", "code"]
+    return filter_required_cell_lines(cell_lines, cell_lines_codes)
 
 
 def average_cell_lines(cell_lines_names: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
@@ -96,7 +90,7 @@ def filter_promoters(
     window_size: int,
     threshold: float,
     drop_always_inactive_rows: bool,
-    nrows:int
+    nrows: int
 ):
     """Return DataFrame containing the promoters filtered for given cell lines and adapted to given window size.
 
@@ -146,12 +140,6 @@ def filter_promoters(
     promoters["start"] = annotation[1].astype(int)
     promoters["end"] = annotation[2].astype(int)
     promoters["strand"] = annotation[3]
-    promoters = promoters.drop(columns=[
-        "short_description",
-        "description",
-        "00Annotation",
-        "association_with_transcript"
-    ])
     positive_strand = promoters.strand == "+"
     negative_strand = promoters.strand == "-"
     promoters[positive_strand].start = promoters[positive_strand].end - window_size
@@ -232,14 +220,15 @@ def filter_enhancers(
         comment="#",
         sep="\t",
         nrows=nrows
-    ).drop(columns="Id")
+    )
     coordinates = load_enhancers_coordinates(genome, info)
-    if center_mode == "peak":
-        center = coordinates.thickStart
-    elif center_mode == "center":
-        center = coordinates.start + (coordinates.end - coordinates.start)/2
-    enhancers["start"] = (center - window_size/2).astype(int)
-    enhancers["end"] = (center + window_size/2).astype(int)
+    enhancers["start"] = coordinates.start
+    enhancers["end"] = coordinates.end
+    enhancers = center_window(
+        enhancers,
+        window_size,
+        coordinates.thickStart if center_mode == "peak" else None
+    )
     enhancers["chromosome"] = coordinates.chromosome
     enhancers = average_cell_lines(cell_lines_names, enhancers)
     if drop_always_inactive_rows:
@@ -255,7 +244,8 @@ def fantom(
     enhancers_threshold: float = 0,
     promoters_threshold: float = 5,
     drop_always_inactive_rows: bool = True,
-    nrows:int=None
+    binarize: bool = True,
+    nrows: int = None
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Runs the pipeline over the fantom raw CAGE data.
 
@@ -275,15 +265,25 @@ def fantom(
         activation threshold for the promoters.
     drop_always_inactive_rows:bool= True,
         whetever to drop the rows where no activation is detected for every rows.
+    binarize: bool= True,
+        Whetever to return the data binary-encoded, zero for inactive, one for active.
     nrows:int=None,
         the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Raises
     ----------------------------------------
     ValueError:
-        If the given genome is not currently supported.
+        If given cell lines list is empty.
     ValueError:
-        If the given window_size is not a strictly positive integer.
+        If given cell lines are not strings.
+    ValueError:
+        If given window size is not an integer.
+    ValueError:
+        If given window size is not a strictly positive integer.
+    ValueError:
+        If given genome version is not a string.
+    ValueError:
+        If given nrows parameter is not None or a strictly positive integer.
     ValueError:
         If given thresholds are not positive real numbers.
     ValueError:
@@ -295,20 +295,15 @@ def fantom(
     """
     if isinstance(cell_lines, str):
         cell_lines = [cell_lines]
-    if not isinstance(window_size, int) or window_size <= 0:
-        raise ValueError("Window size must be a strictly positive integer.")
+    cell_lines = normalize_cell_lines(cell_lines)
+    info = load_info("fantom_data")
+    validate_common_parameters(cell_lines, window_size, genome, nrows, info)
     for threshold in (enhancers_threshold, promoters_threshold):
         if not isinstance(threshold, (float, int)) or threshold < 0:
             raise ValueError("Threshold must be a positive real number.")
-    if center_enhancers not in ["peak", "center"]:
+    if center_enhancers not in ("peak", "center"):
         raise ValueError("The given center_enhancers option {center_enhancers} is not supported.".format(
             center_enhancers=center_enhancers
-        ))
-
-    info = load_info("fantom_data")
-    if genome not in info:
-        raise ValueError("Given genome {genome} is not currently supported.".format(
-            genome=genome
         ))
 
     cell_lines_names = filter_cell_lines(cell_lines, genome, info)
@@ -333,4 +328,13 @@ def fantom(
         drop_always_inactive_rows=drop_always_inactive_rows,
         nrows=nrows
     ).reset_index(drop=True)
+
+    if binarize:
+        enhancers[cell_lines] = (enhancers[cell_lines]
+                                 > enhancers_threshold).astype(int)
+        promoters[cell_lines] = (promoters[cell_lines]
+                                 > promoters_threshold).astype(int)
+
+    enhancers = normalize_bed_file(cell_lines, enhancers)
+    promoters = normalize_bed_file(cell_lines, promoters)
     return enhancers, promoters
