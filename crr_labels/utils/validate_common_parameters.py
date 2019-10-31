@@ -51,7 +51,7 @@ def validate_common_parameters(
             "Given window size is not a strictly positive integer.")
     if not isinstance(genome, str):
         raise ValueError("Given genome version is not a string.")
-    if nrows is not None and not isinstance(nrows, int) and nrows <= 0:
+    if nrows is not None and (not isinstance(nrows, int) or nrows <= 0):
         raise ValueError(
             "Given nrows can either be None of a strictly positive integer.")
     if genome not in info:

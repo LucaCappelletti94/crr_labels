@@ -295,9 +295,9 @@ def fantom(
     """
     if isinstance(cell_lines, str):
         cell_lines = [cell_lines]
-    cell_lines = normalize_cell_lines(cell_lines)
     info = load_info("fantom_data")
     validate_common_parameters(cell_lines, window_size, genome, nrows, info)
+    cell_lines = normalize_cell_lines(cell_lines)
     for threshold in (enhancers_threshold, promoters_threshold):
         if not isinstance(threshold, (float, int)) or threshold < 0:
             raise ValueError("Threshold must be a positive real number.")
