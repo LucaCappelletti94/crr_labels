@@ -2,7 +2,7 @@ crr_labels
 =========================================================================================
 |travis| |sonar_quality| |sonar_maintainability| |codacy| |code_climate_maintainability| |pip| |downloads|
 
-Python package wrapping over FANTOM labels for cis regulatory regions.
+Python package wrapping over FANTOM and Roadmap labels for cis regulatory regions.
 
 How do I install this package?
 ----------------------------------------------
