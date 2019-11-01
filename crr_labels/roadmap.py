@@ -3,7 +3,39 @@ from .utils import download, load_info, filter_required_cell_lines, validate_com
 import pandas as pd
 
 
-def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.DataFrame:
+def roadmap_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
+    """Return Roadmap supported available cell lines.
+
+    Parameters
+    ---------------------------------------
+    genome: str = "hg19",
+        considered genome version. Currently supported only "hg19".
+
+    Returns
+    ---------------------------------------
+    Return dataframe with the cell lines supported available in Roadmap dataset.
+    """
+    info = load_info("roadmap_data")
+    download(info[genome]["cell_lines"], "roadmap_data")
+    cell_lines_codes = pd.read_csv(
+        "roadmap_data/{path}".format(
+            path=info[genome]["cell_lines"].split("/")[-1]
+        ),
+        sep="\t"
+    )
+    cell_lines_codes = cell_lines_codes[
+        (cell_lines_codes.TYPE != "ESCDerived") & (
+            (cell_lines_codes.GROUP == "ENCODE2012") |
+            (cell_lines_codes.GROUP == "ESC")
+        )
+    ]
+    cell_lines_codes["cell_line"] = cell_lines_codes.MNEMONIC.str.split(
+        ".").str[1]
+    cell_lines_codes["code"] = cell_lines_codes.EID
+    return cell_lines_codes[["cell_line", "code"]].reset_index(drop=True)
+
+
+def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
     """Return Roadmap cell lines names for given cell lines.
 
     Parameters
@@ -12,8 +44,6 @@ def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.Data
         list of cell lines to be considered.
     genome: str,
         considered genome version. Currently supported only "hg19".
-    info: Dict,
-        informations for Roadmap dataset.
 
     Raises
     ---------------------------------------
@@ -24,23 +54,7 @@ def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.Data
     ---------------------------------------
     Return dataframe with the cell lines mapped to Roadmap name.
     """
-    download(info[genome]["cell_lines"], "roadmap_data")
-    cell_lines_info = pd.read_csv(
-        "roadmap_data/{path}".format(
-            path=info[genome]["cell_lines"].split("/")[-1]
-        ),
-        sep="\t"
-    )
-    cell_lines_info = cell_lines_info[
-        (cell_lines_info.TYPE != "ESCDerived") & (
-            (cell_lines_info.GROUP == "ENCODE2012") |
-            (cell_lines_info.GROUP == "ESC")
-        )
-    ]
-    cell_lines_info["cell_line"] = cell_lines_info.MNEMONIC.str.split(
-        ".").str[1]
-    cell_lines_info["code"] = cell_lines_info.EID
-    return filter_required_cell_lines(cell_lines, cell_lines_info)
+    return filter_required_cell_lines(cell_lines, roadmap_available_cell_lines(genome))
 
 
 def get_cell_line(
@@ -149,8 +163,7 @@ def roadmap(
 
     cell_lines_names = filter_cell_lines(
         cell_lines,
-        genome,
-        info
+        genome
     )
 
     url = info[genome]["states_model"][str(states)]

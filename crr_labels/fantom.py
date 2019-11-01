@@ -3,7 +3,39 @@ from typing import List, Dict, Tuple,  Union
 import pandas as pd
 
 
-def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.DataFrame:
+def fantom_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
+    """Return supported cell lines available within FANTOM dataset.
+
+    Parameters
+    ---------------------------------------
+    genome: str = "hg19",
+        considered genome version. Currently supported only "hg19".
+
+    Returns
+    ---------------------------------------
+    Return dataframe with the supported cell lines mapped to FANTOM name.
+    """
+    info = load_info("fantom_data")
+    download(info[genome]["cell_lines"], "fantom_data")
+    df = pd.read_csv("fantom_data/{filename}".format(
+        filename=info[genome]["cell_lines"].split("/")[-1]
+    ), sep="\t", header=None)
+    cell_lines_names = df[0].str.split("cell line:", expand=True)
+    mask = pd.notnull(cell_lines_names[1])
+    cell_lines_names = cell_lines_names[mask]
+    cell_lines_codes = pd.concat(
+        objs=[
+            cell_lines_names[1].apply(lambda x: x.split("ENCODE")[
+                                      0].strip()).str.upper(),
+            df[mask][1],
+        ],
+        axis=1
+    )
+    cell_lines_codes.columns = ["cell_line", "code"]
+    return cell_lines_codes.reset_index(drop=True)
+
+
+def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
     """Return FANTOM cell lines names for given cell lines.
 
     Parameters
@@ -12,8 +44,6 @@ def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.Data
         list of cell lines to be considered.
     genome: str,
         considered genome version. Currently supported only "hg19".
-    info: Dict,
-        informations for FANTOM dataset.
 
     Raises
     ---------------------------------------
@@ -24,23 +54,7 @@ def filter_cell_lines(cell_lines: List[str], genome: str, info: Dict) -> pd.Data
     ---------------------------------------
     Return dataframe with the cell lines mapped to FANTOM name.
     """
-    download(info[genome]["cell_lines"], "fantom_data")
-    df = pd.read_csv("fantom_data/{filename}".format(
-        filename=info[genome]["cell_lines"].split("/")[-1]
-    ), sep="\t", header=None)
-    cell_lines_names = df[0].str.split("cell line:", expand=True)
-    mask = pd.notnull(cell_lines_names[1])
-    cell_lines_names = cell_lines_names[mask]
-    cell_lines_codes = pd.concat(
-        objs=[
-            cell_lines_names[0],
-            cell_lines_names[1].apply(lambda x: x.split("ENCODE")[0].strip()).str.upper(),
-            df[mask][1],
-        ],
-        axis=1
-    )
-    cell_lines_codes.columns = ["tissue", "cell_line", "code"]
-    return filter_required_cell_lines(cell_lines, cell_lines_codes)
+    return filter_required_cell_lines(cell_lines, fantom_available_cell_lines(genome))
 
 
 def average_cell_lines(cell_lines_names: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
@@ -306,7 +320,7 @@ def fantom(
             center_enhancers=center_enhancers
         ))
 
-    cell_lines_names = filter_cell_lines(cell_lines, genome, info)
+    cell_lines_names = filter_cell_lines(cell_lines, genome)
     enhancers = filter_enhancers(
         cell_lines=cell_lines,
         cell_lines_names=cell_lines_names,
