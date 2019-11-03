@@ -24,10 +24,7 @@ def roadmap_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
         sep="\t"
     )
     cell_lines_codes = cell_lines_codes[
-        (cell_lines_codes.TYPE != "ESCDerived") & (
-            (cell_lines_codes.GROUP == "ENCODE2012") |
-            (cell_lines_codes.GROUP == "ESC")
-        )
+        (cell_lines_codes.TYPE != "ESCDerived") & cell_lines_codes.GROUP.isin(["ENCODE2012", "ESC", "IMR90"])
     ]
     cell_lines_codes["cell_line"] = cell_lines_codes.MNEMONIC.str.split(
         ".").str[1].str.replace("-", "")
@@ -59,6 +56,7 @@ def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
 
 def get_cell_line(
     cell_line: str,
+    states: int,
     enhancers_labels: List[str],
     promoters_labels: List[str],
     url: str
@@ -69,6 +67,8 @@ def get_cell_line(
     -----------------------------------
     cell_line: str,
         The chosen cell line standard name.
+    states: int,
+        The number of states of the chosen model.
     enhancers_labels: List[str],
         The labels to use for active enhancers.
     promoters_labels: List[str],
@@ -81,10 +81,19 @@ def get_cell_line(
     Return tuple containing the dataframe of the enhancers
     and the dataframe of the promoters for the given cell line.
     """
-    download(url, "roadmap_data")
+    root = "roadmap_data/{states}".format(states=states)
+    path = "{cell_line}.bed.gz".format(cell_line=cell_line)
+    try:
+        download(url, root, path)
+    except ValueError:
+        raise ValueError("Given cell line {cell_line} is not available within Roadmap model with {states} states.".format(
+            cell_line=cell_line,
+            states=states
+        ))
     roadmap_data = pd.read_csv(
-        "roadmap_data/{path}".format(
-            path=url.split("/")[-1]
+        "{root}/{path}".format(
+            root=root,
+            path=path
         ),
         sep="\t",
         skiprows=[0, 1],
@@ -170,6 +179,7 @@ def roadmap(
     enhancers_list, promoters_list = list(zip(*[
         get_cell_line(
             cell_line,
+            states,
             enhancers_labels,
             promoters_labels,
             url.format(code=code)
