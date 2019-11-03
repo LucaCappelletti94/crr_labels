@@ -21,13 +21,17 @@ def fantom_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
         filename=info[genome]["cell_lines"].split("/")[-1]
     ), sep="\t", header=None)
     cell_lines_names = df[0].str.split("cell line:", expand=True)
-    mask = pd.notnull(cell_lines_names[1])
-    cell_lines_names = cell_lines_names[mask]
+    nan_mask = pd.notnull(cell_lines_names[1])
+    cell_lines_names = cell_lines_names[nan_mask]
+    infected_mask = ~cell_lines_names[1].str.contains("infection")
+    cell_lines_names = cell_lines_names[infected_mask]
+    cell_lines_names[1] = cell_lines_names[1].str.split("/").str[0]
+    cell_lines_names[1] = cell_lines_names[1].str.split(",").str[0]
     cell_lines_codes = pd.concat(
         objs=[
             cell_lines_names[1].apply(lambda x: x.split("ENCODE")[
-                                      0].strip()).str.upper(),
-            df[mask][1],
+                                      0].strip()).str.upper().str.replace("-", ""),
+            df[nan_mask][infected_mask][1],
         ],
         axis=1
     )

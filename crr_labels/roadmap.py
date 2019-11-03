@@ -30,7 +30,7 @@ def roadmap_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
         )
     ]
     cell_lines_codes["cell_line"] = cell_lines_codes.MNEMONIC.str.split(
-        ".").str[1]
+        ".").str[1].str.replace("-", "")
     cell_lines_codes["code"] = cell_lines_codes.EID
     return cell_lines_codes[["cell_line", "code"]].reset_index(drop=True)
 

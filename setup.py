@@ -44,7 +44,7 @@ extras = {
 setup(
     name='crr_labels',
     version=__version__,
-    description="Python package wrapping over FANTOM and ENCODE labels for cis regulatory regions.",
+    description="Python package wrapping over FANTOM and Roadmap labels for cis regulatory regions.",
     long_description=long_description,
     url="https://github.com/LucaCappelletti94/crr_labels",
     author="Luca Cappelletti",
