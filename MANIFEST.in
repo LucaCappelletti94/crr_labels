@@ -1,1 +1,2 @@
-crr_labels/fantom_data.json
+include crr_labels/fantom_data.json
+include crr_labels/roadmap_data.json

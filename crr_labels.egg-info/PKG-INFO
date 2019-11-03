@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: crr-labels
-Version: 1.0.2
+Version: 1.0.3
 Summary: Python package wrapping over FANTOM and Roadmap labels for cis regulatory regions.
 Home-page: https://github.com/LucaCappelletti94/crr_labels
 Author: Luca Cappelletti

@@ -4,7 +4,9 @@ setup.py
 crr_labels/__init__.py
 crr_labels/__version__.py
 crr_labels/fantom.py
+crr_labels/fantom_data.json
 crr_labels/roadmap.py
+crr_labels/roadmap_data.json
 crr_labels.egg-info/PKG-INFO
 crr_labels.egg-info/SOURCES.txt
 crr_labels.egg-info/dependency_links.txt
