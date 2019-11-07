@@ -1,9 +1,9 @@
 from .utils import download, load_info, filter_required_cell_lines, validate_common_parameters, center_window, normalize_cell_lines, normalize_bed_file
 from typing import List, Dict, Tuple,  Union
 import pandas as pd
-from IPython.display import display
 
-def fantom_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
+
+def fantom_available_cell_lines(genome: str = "hg19") -> pd.DataFrame:
     """Return supported cell lines available within FANTOM dataset.
 
     Parameters
@@ -22,11 +22,11 @@ def fantom_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
     ), sep="\t", header=None)
     cell_lines_names = df[0].str.split("cell line:", expand=True)
     cell_lines_names[1][
-        cell_lines_names[0].str.startswith("H1") & 
+        cell_lines_names[0].str.startswith("H1") &
         cell_lines_names[0].str.contains("day00")
     ] = "H1"
     cell_lines_names[1][
-        cell_lines_names[0].str.startswith("H9") & 
+        cell_lines_names[0].str.startswith("H9") &
         cell_lines_names[0].str.contains("H9ES")
     ] = "H9"
     nan_mask = pd.notnull(cell_lines_names[1])
