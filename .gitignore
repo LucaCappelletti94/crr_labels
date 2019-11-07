@@ -18,3 +18,5 @@ coverage.xml
 fantom_data
 roadmap_data
 .ipynb*
+fantom.rst
+roadmap.rst
