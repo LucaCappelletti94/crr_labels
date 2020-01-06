@@ -39,8 +39,8 @@ To retrieve the FANTOM promoters and enhancers you can proceed as follows:
         enhancers_threshold = 0, # activation threshold for the enhancers.
         promoters_threshold = 5, # activation threshold for the promoters.
         drop_always_inactive_rows = True, # whetever to drop the rows where no activation is detected for every rows.
-        binarize: bool= True, # Whetever to return the data binary-encoded, zero for inactive, one for active.
-        nrows:int=None # the number of rows to read, usefull when testing pipelines for creating smaller datasets.
+        binarize = True, # Whetever to return the data binary-encoded, zero for inactive, one for active.
+        nrows = None # the number of rows to read, usefull when testing pipelines for creating smaller datasets.
     )
 
 The library will download and parse the fantom project raw data and return two dataframes for the required cell lines.
@@ -66,13 +66,13 @@ To retrieve the Roadmap promoters and enhancers you can proceed as follows:
     from crr_labels import roadmap
 
     enhancers, promoters = roadmap(
-        cell_lines=["HelaS3", "GM12878"], # List of cell lines to be considered.
-        window_size=200, # Window size to use for the various regions.
+        cell_lines = ["HelaS3", "GM12878"], # List of cell lines to be considered.
+        window_size = 200, # Window size to use for the various regions.
         genome = "hg19", # Considered genome version. Currently supported only "hg19".
-        states: int = 18, # Number of the states of the model to consider. Currently supported only "15" and "18".
-        enhancers_labels: List[str] = ("7_Enh", "9_EnhA1", "10_EnhA2"), # Labels to encode as active enhancers.
-        promoters_labels: List[str] = ("1_TssA",), # Labels to enode as active promoters.
-        nrows:int=None # the number of rows to read, usefull when testing pipelines for creating smaller datasets.
+        states = 18, # Number of the states of the model to consider. Currently supported only "15" and "18".
+        enhancers_labels = ("7_Enh", "9_EnhA1", "10_EnhA2"), # Labels to encode as active enhancers.
+        promoters_labels = ("1_TssA",), # Labels to enode as active promoters.
+        nrows = None # the number of rows to read, usefull when testing pipelines for creating smaller datasets.
     )
 
 Consider reading the method docstring for more id-depth informations about the method.
