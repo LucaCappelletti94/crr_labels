@@ -1,4 +1,4 @@
-chromosome,start,end,strand,GM12878,HELAS3
+chrom,chromStart,chromEnd,strand,GM12878,HELAS3
 chr1,235300,236300,.,1,0
 chr1,738900,739900,.,1,0
 chr1,754800,755800,.,1,0

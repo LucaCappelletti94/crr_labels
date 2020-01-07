@@ -31,15 +31,19 @@ def test_fantom():
                         )
                         if not os.path.exists(path):
                             os.makedirs(path)
-                            enhancers.to_csv("{path}/enhancers.csv".format(path=path), index=False)
-                            promoters.to_csv("{path}/promoters.csv".format(path=path), index=False)
+                            enhancers.to_csv(
+                                "{path}/enhancers.csv".format(path=path), index=False, sep="\t")
+                            promoters.to_csv(
+                                "{path}/promoters.csv".format(path=path), index=False, sep="\t")
                         assert_frame_equal(
                             enhancers,
-                            pd.read_csv("{path}/enhancers.csv".format(path=path)),
+                            pd.read_csv(
+                                "{path}/enhancers.csv".format(path=path), sep="\t"),
                             check_dtype=False
                         )
                         assert_frame_equal(
                             promoters,
-                            pd.read_csv("{path}/promoters.csv".format(path=path)),
+                            pd.read_csv(
+                                "{path}/promoters.csv".format(path=path), sep="\t"),
                             check_dtype=False
                         )
