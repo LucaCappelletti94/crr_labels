@@ -168,8 +168,8 @@ def filter_promoters(
     promoters["strand"] = annotation[3]
     positive_strand = promoters.strand == "+"
     negative_strand = promoters.strand == "-"
-    promoters[positive_strand].start = promoters[positive_strand].end - window_size
-    promoters[negative_strand].end = promoters[negative_strand].start + window_size
+    promoters.loc[promoters.index[positive_strand], "start"] = promoters[positive_strand]["end"] - window_size
+    promoters.loc[promoters.index[negative_strand], "end"] =  promoters[negative_strand]["start"] + window_size
     promoters = average_cell_lines(cell_lines_names, promoters)
     if drop_always_inactive_rows:
         promoters = drop_always_inactives(promoters, cell_lines, threshold)

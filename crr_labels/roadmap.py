@@ -103,10 +103,10 @@ def get_cell_line(
 
     roadmap_data = roadmap_data.set_index(["chromosome", "start", "end"])
 
-    enhancers = roadmap_data[roadmap_data[cell_line].isin(enhancers_labels)]
-    promoters = roadmap_data[roadmap_data[cell_line].isin(promoters_labels)]
-    enhancers.loc[:, cell_line] = 1  # Encode active enhancers as 1
-    promoters.loc[:, cell_line] = 1  # Encode active promoters as 1
+    enhancers = roadmap_data[roadmap_data[cell_line].isin(enhancers_labels)].copy()
+    promoters = roadmap_data[roadmap_data[cell_line].isin(promoters_labels)].copy()
+    enhancers[cell_line] = 1  # Encode active enhancers as 1
+    promoters[cell_line] = 1  # Encode active promoters as 1
 
     return enhancers, promoters
 

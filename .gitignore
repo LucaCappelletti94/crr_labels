@@ -20,3 +20,4 @@ roadmap_data
 .ipynb*
 fantom.rst
 roadmap.rst
+*.egg-info
