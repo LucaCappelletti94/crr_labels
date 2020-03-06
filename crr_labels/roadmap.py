@@ -83,13 +83,9 @@ def get_cell_line(
     """
     root = "roadmap_data/{states}".format(states=states)
     path = "{cell_line}.bed.gz".format(cell_line=cell_line)
-    try:
-        download(url, root, path)
-    except ValueError:
-        raise ValueError("Given cell line {cell_line} is not available within Roadmap model with {states} states.".format(
-            cell_line=cell_line,
-            states=states
-        ))
+
+    download(url, root, path)
+
     roadmap_data = pd.read_csv(
         "{root}/{path}".format(
             root=root,
