@@ -23,17 +23,17 @@ def test_roadmap():
             )
             if not os.path.exists(path):
                 os.makedirs(path)
-                enhancers.to_csv("{path}/enhancers.csv".format(path=path), index=False)
-                promoters.to_csv("{path}/promoters.csv".format(path=path), index=False)
+                enhancers.to_csv("{path}/enhancers.csv.gz".format(path=path), index=False)
+                promoters.to_csv("{path}/promoters.csv.gz".format(path=path), index=False)
             assert (enhancers.chromEnd - enhancers.chromStart == window_size).all()
             assert_frame_equal(
                 enhancers,
-                pd.read_csv("{path}/enhancers.csv".format(path=path)),
+                pd.read_csv("{path}/enhancers.csv.gz".format(path=path)),
                 check_dtype=False
             )
             assert (promoters.chromEnd - promoters.chromStart == window_size).all()
             assert_frame_equal(
                 promoters,
-                pd.read_csv("{path}/promoters.csv".format(path=path)),
+                pd.read_csv("{path}/promoters.csv.gz".format(path=path)),
                 check_dtype=False
             )

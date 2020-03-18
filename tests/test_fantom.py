@@ -32,20 +32,20 @@ def test_fantom():
                         if not os.path.exists(path):
                             os.makedirs(path)
                             enhancers.to_csv(
-                                "{path}/enhancers.csv".format(path=path), index=False, sep="\t")
+                                "{path}/enhancers.csv.gz".format(path=path), index=False, sep="\t")
                             promoters.to_csv(
-                                "{path}/promoters.csv".format(path=path), index=False, sep="\t")
+                                "{path}/promoters.csv.gz".format(path=path), index=False, sep="\t")
                         assert (enhancers.chromEnd - enhancers.chromStart == window_size).all()
                         assert_frame_equal(
                             enhancers,
                             pd.read_csv(
-                                "{path}/enhancers.csv".format(path=path), sep="\t"),
+                                "{path}/enhancers.csv.gz".format(path=path), sep="\t"),
                             check_dtype=False
                         )
                         assert (promoters.chromEnd - promoters.chromStart == window_size).all()
                         assert_frame_equal(
                             promoters,
                             pd.read_csv(
-                                "{path}/promoters.csv".format(path=path), sep="\t"),
+                                "{path}/promoters.csv.gz".format(path=path), sep="\t"),
                             check_dtype=False
                         )
