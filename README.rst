@@ -2,7 +2,7 @@ crr_labels
 =========================================================================================
 |travis| |sonar_quality| |sonar_maintainability| |codacy| |code_climate_maintainability| |pip| |downloads|
 
-Python package wrapping over FANTOM and Roadmap labels for cis regulatory regions.
+Python package wrapping over FANTOM and Roadmap labels for cis-regulatory regions.
 
 How do I install this package?
 ----------------------------------------------
@@ -14,13 +14,13 @@ As usual, just download it using pip:
 
 Tests Coverage
 ----------------------------------------------
-Since some software handling coverages sometime get slightly different results, here's three of them:
+Since some software handling coverages sometimes get slightly different results, here's three of them:
 
 |coveralls| |sonar_coverage| |code_climate_coverage|
 
 Usage examples
 -----------------------------------------------
-Currently we support `FANTOM CAGE data <http://fantom.gsc.riken.jp/5/data/>`_ and `Roadmap <https://egg2.wustl.edu/roadmap/web_portal/chr_state_learning.html>`_ but in the future an additional
+Currently, we support `FANTOM CAGE data <http://fantom.gsc.riken.jp/5/data/>`_ and `Roadmap <https://egg2.wustl.edu/roadmap/web_portal/chr_state_learning.html>`_ but in the future an additional
 cis-regulatory dataset based on open chromatin data will be added.
 
 FANTOM
@@ -75,11 +75,11 @@ To retrieve the Roadmap promoters and enhancers you can proceed as follows:
         nrows = None # the number of rows to read, usefull when testing pipelines for creating smaller datasets.
     )
 
-Consider reading the method docstring for more id-depth informations about the method.
+Consider reading the method docstring for more in-depth information about the method.
 
 Rendered datasets
 ----------------------------------
-The following two datasets have label for 7 common cell lines (GM12878, HelaS3, HepG2, K562, A549, H1, H9) and for various other that were not available in the other dataset.
+The following two datasets have labels for 7 common cell lines (GM12878, HelaS3, HepG2, K562, A549, H1, H9) and for various other that were not available in the other dataset.
 
 FANTOM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,7 +134,7 @@ The following datasets contain data for the cell lines GM12878, HelaS3, HepG2, K
     :target: https://pepy.tech/badge/crr-labels
     :alt: Pypi total project downloads 
 
-.. |codacy|  image:: https://api.codacy.com/project/badge/Grade/c0a7e110045a4d25933c65fe2014a33c
+.. |codacy| image:: https://api.codacy.com/project/badge/Grade/c0a7e110045a4d25933c65fe2014a33c
     :target: https://www.codacy.com/manual/LucaCappelletti94/crr_labels?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LucaCappelletti94/crr_labels&amp;utm_campaign=Badge_Grade
     :alt: Codacy Maintainability
 
