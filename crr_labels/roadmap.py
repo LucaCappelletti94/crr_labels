@@ -189,7 +189,7 @@ def roadmap(
 
     # Adapt to given window size
     enhancers = enhancers.reset_index()
-    promoters = enhancers.reset_index()
+    promoters = promoters.reset_index()
     enhancers = center_window(enhancers, window_size)
     promoters = center_window(promoters, window_size)
 
