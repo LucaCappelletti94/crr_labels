@@ -44,7 +44,7 @@ def fantom_available_cell_lines(genome: str = "hg19") -> pd.DataFrame:
         axis=1
     )
     cell_lines_codes.columns = ["cell_line", "code"]
-    return cell_lines_codes.reset_index(drop=True)
+    return cell_lines_codes.reset_index(drop=True).groupby("cell_line").first().reset_index()
 
 
 def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
