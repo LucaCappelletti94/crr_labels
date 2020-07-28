@@ -1,6 +1,11 @@
-from typing import Union, Tuple, List
-from .utils import download, load_info, filter_required_cell_lines, validate_common_parameters, center_window, normalize_bed_file, normalize_cell_lines
+from typing import List, Tuple, Union
+import warnings
 import pandas as pd
+from tqdm.auto import tqdm
+
+from .utils import (center_window, download, filter_required_cell_lines,
+                    load_info, normalize_bed_file, normalize_cell_lines,
+                    validate_common_parameters)
 
 
 def roadmap_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
@@ -84,7 +89,16 @@ def get_cell_line(
     root = "roadmap_data/{states}".format(states=states)
     path = "{cell_line}.bed.gz".format(cell_line=cell_line)
 
-    download(url, root, path)
+    try:
+        download(url, root, path)
+    except ValueError:
+        warnings.warn(
+            "Unable to retrieve the data relative to cell line {}".format(
+                cell_line
+            ),
+            UserWarning
+        )
+        return None, None
 
     roadmap_data = pd.read_csv(
         "{root}/{path}".format(
@@ -173,19 +187,26 @@ def roadmap(
 
     url = info[genome]["states_model"][str(states)]
     enhancers_list, promoters_list = list(zip(*[
-        get_cell_line(
+        (enhancers, promoters)
+        for cell_line, code in tqdm(
+            cell_lines_names.values,
+            desc="Cell lines"
+        )
+        for enhancers, promoters in (get_cell_line(
             cell_line,
             states,
             enhancers_labels,
             promoters_labels,
             url.format(code=code)
-        )
-        for cell_line, code in cell_lines_names.values
+        ),)
+        if enhancers is not None and promoters is not None
     ]))
     enhancers = pd.concat(enhancers_list, axis=1).fillna(
-        0).astype(int)  # Encode inactive enhancers as zeros
+        0
+    ).astype(int)  # Encode inactive enhancers as zeros
     promoters = pd.concat(promoters_list, axis=1).fillna(
-        0).astype(int)  # Encode inactive promoters as zeros
+        0
+    ).astype(int)  # Encode inactive promoters as zeros
 
     # Adapt to given window size
     enhancers = enhancers.reset_index()
