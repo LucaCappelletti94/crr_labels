@@ -62,7 +62,8 @@ setup(
     # Add here the package dependencies
     install_requires=[
         "encodeproject",
-        "pandas"
+        "pandas",
+        "cache_decorator[all]"
     ],
     extras_require=extras,
 )
