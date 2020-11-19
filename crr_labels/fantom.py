@@ -108,6 +108,28 @@ def drop_always_inactives(data: pd.DataFrame, cell_lines: List[str], threshold: 
     return data[(data[cell_lines] > threshold).any(axis=1)]
 
 
+def normalize_promoters_annotation(annotations: pd.Series) -> pd.DataFrame:
+    first_value = annotations.iloc[0]
+    if "::" in first_value:
+        # In the hg38 CAGE Peaks files for the promoters from FANTOM5
+        # there is an additional notation `hg19::` at the start of the
+        # index metadata that needs to be removed.
+        annotations = annotations.str.split("::").str[1]
+    if ";" in first_value:
+        # In the hg38 CAGE Peaks files for the promoters from FANTOM5
+        # there is an additional notation `;hg_1.1` at the end of the
+        #  that needs to be removed.
+        annotations = annotations.str.split(";").str[0]
+    annotations = annotations.str.replace("\.\.", ",")
+    annotations = annotations.str.replace(":", ",")
+    annotations = annotations.str.split(",", expand=True)
+    annotations.columns = ["chromosome", "start", "end", "strand"]
+    annotations["start"] = annotations["start"].astype(int)
+    annotations["end"] = annotations["end"].astype(int)
+
+    return annotations
+
+
 def filter_promoters(
     cell_lines: List[str],
     cell_lines_names: pd.DataFrame,
@@ -151,7 +173,7 @@ def filter_promoters(
         comment="#",
         sep="\t",
         nrows=nrows
-    ).drop(index=[0, 1])
+    ).drop(index=[0, 1]).reset_index(drop=True)
     promoters = promoters.drop(columns=[
         c for c in promoters.columns
         if c.endswith("_id")
@@ -160,16 +182,16 @@ def filter_promoters(
         c.split(".")[2] if c.startswith("tpm") else c for c in promoters.columns
     ]
     promoters = promoters[promoters.description.str.endswith("end")]
-    annotation = promoters["00Annotation"].str.replace(
-        ":", ",").str.replace(r"\.\.", ",").str.split(",", expand=True)
-    promoters["chromosome"] = annotation[0]
-    promoters["start"] = annotation[1].astype(int)
-    promoters["end"] = annotation[2].astype(int)
-    promoters["strand"] = annotation[3]
+    promoters = pd.concat([
+        promoters,
+        normalize_promoters_annotation(promoters["00Annotation"])
+    ], axis=1)
     positive_strand = promoters.strand == "+"
     negative_strand = promoters.strand == "-"
-    promoters.loc[promoters.index[positive_strand], "start"] = promoters[positive_strand]["end"] - window_size
-    promoters.loc[promoters.index[negative_strand], "end"] =  promoters[negative_strand]["start"] + window_size
+    promoters.loc[promoters.index[positive_strand],
+                  "start"] = promoters[positive_strand]["end"] - window_size
+    promoters.loc[promoters.index[negative_strand],
+                  "end"] = promoters[negative_strand]["start"] + window_size
     promoters = average_cell_lines(cell_lines_names, promoters)
     if drop_always_inactive_rows:
         promoters = drop_always_inactives(promoters, cell_lines, threshold)
