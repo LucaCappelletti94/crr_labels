@@ -120,7 +120,7 @@ def normalize_promoters_annotation(annotations: pd.Series) -> pd.DataFrame:
         # there is an additional notation `;hg_1.1` at the end of the
         #  that needs to be removed.
         annotations = annotations.str.split(";").str[0]
-    annotations = annotations.str.replace("\.\.", ",")
+    annotations = annotations.str.replace(r"\.\.", ",")
     annotations = annotations.str.replace(":", ",")
     annotations = annotations.str.split(",", expand=True)
     annotations.columns = ["chromosome", "start", "end", "strand"]
