@@ -18,13 +18,15 @@ def normalize_bed_file(cell_lines: List[str], bed_file: pd.DataFrame) -> pd.Data
     """
     if "strand" not in bed_file:
         bed_file["strand"] = "."
+    if "lifted" not in bed_file:
+        bed_file["lifted"] = False
     cell_lines = [
         cell_line
         for cell_line in cell_lines
         if cell_line in bed_file.columns
     ]
     df = bed_file[["chromosome", "start",
-                   "end", "strand", *sorted(cell_lines)]]
+                   "end", "strand", *sorted(cell_lines), "lifted"]]
     return df.rename(columns={
         "chromosome": "chrom",
         "start": "chromStart",

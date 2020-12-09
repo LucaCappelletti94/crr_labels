@@ -110,6 +110,7 @@ def drop_always_inactives(data: pd.DataFrame, cell_lines: List[str], threshold: 
 
 def normalize_promoters_annotation(annotations: pd.Series) -> pd.DataFrame:
     first_value = annotations.iloc[0]
+    lifted_from_hg19 = annotations.str.contains("hg19")
     if "::" in first_value:
         # In the hg38 CAGE Peaks files for the promoters from FANTOM5
         # there is an additional notation `hg19::` at the start of the
@@ -126,6 +127,7 @@ def normalize_promoters_annotation(annotations: pd.Series) -> pd.DataFrame:
     annotations.columns = ["chromosome", "start", "end", "strand"]
     annotations["start"] = annotations["start"].astype(int)
     annotations["end"] = annotations["end"].astype(int)
+    annotations["lifted"] = lifted_from_hg19
 
     return annotations
 
@@ -172,7 +174,8 @@ def filter_promoters(
         ),
         comment="#",
         sep="\t",
-        nrows=nrows
+        nrows=nrows,
+        low_memory=False
     ).drop(index=[0, 1]).reset_index(drop=True)
     promoters = promoters.drop(columns=[
         c for c in promoters.columns
@@ -220,7 +223,8 @@ def load_enhancers_coordinates(genome: str, info: Dict) -> pd.DataFrame:
         sep="\t",
         header=None,
         names=["chromosome", "start", "end", "name", "score", "strand",
-               "thickStart", "thickEnd", "itemRgb", "blockCount", "blockSizes", "blockStarts"]
+               "thickStart", "thickEnd", "itemRgb", "blockCount", "blockSizes", "blockStarts"],
+        low_memory=False
     )
 
 
@@ -267,7 +271,8 @@ def filter_enhancers(
         ),
         comment="#",
         sep="\t",
-        nrows=nrows
+        nrows=nrows,
+        low_memory=False
     )
     coordinates = load_enhancers_coordinates(genome, info)
     enhancers["start"] = coordinates.start
