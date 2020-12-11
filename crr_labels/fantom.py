@@ -121,7 +121,7 @@ def load_matrix(root: str, genome: str, region: str, info: Dict, nrows: int) -> 
     bed_path = f"{root}/{genome}/{region}/regions.bed.gz"
     download(info[genome][region]["matrix"], matrix_path, cache=True)
     download(info[genome][region]["bed"], bed_path, cache=True)
-    if region == "promoters":
+    if nrows is not None and region == "promoters":
         nrows += 2
     matrix = pd.read_csv(
         matrix_path,
