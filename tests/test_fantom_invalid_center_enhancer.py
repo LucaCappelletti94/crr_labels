@@ -4,4 +4,4 @@ import pytest
 
 def test_fantom_invalid_center_enhancer():
     with pytest.raises(ValueError):
-        fantom("HelaS3", 200, center_enhancers="invalid_mode")
+        next(fantom("HelaS3", 200, center_enhancers="invalid_mode"))

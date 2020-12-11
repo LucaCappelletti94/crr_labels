@@ -17,7 +17,11 @@ __pycache__
 coverage.xml
 fantom_data
 roadmap_data
+fantom_test
 .ipynb*
 fantom.rst
 roadmap.rst
 *.egg-info
+.pytest_cache
+fantom
+roadmap

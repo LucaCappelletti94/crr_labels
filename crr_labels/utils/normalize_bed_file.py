@@ -27,8 +27,10 @@ def normalize_bed_file(cell_lines: List[str], bed_file: pd.DataFrame) -> pd.Data
     ]
     df = bed_file[["chromosome", "start",
                    "end", "strand", *sorted(cell_lines), "lifted"]]
-    return df.rename(columns={
-        "chromosome": "chrom",
-        "start": "chromStart",
-        "end": "chromEnd"
-    })
+    return df.rename(
+        columns={
+            "chromosome": "chrom",
+            "start": "chromStart",
+            "end": "chromEnd"
+        }
+    )

@@ -1,25 +1,32 @@
-from .utils import download, load_info, filter_required_cell_lines, validate_common_parameters, center_window, normalize_cell_lines, normalize_bed_file
-from typing import List, Dict, Tuple,  Union
+from encodeproject import download
+from .utils import filter_required_cell_lines, validate_common_parameters, center_window, normalize_cell_lines, normalize_bed_file, load_bed
+from typing import List, Dict, Tuple,  Union, Generator
+import compress_json
 import pandas as pd
 
 
-def fantom_available_cell_lines(genome: str = "hg19") -> pd.DataFrame:
+def fantom_available_cell_lines(
+    root: str,
+) -> pd.DataFrame:
     """Return supported cell lines available within FANTOM dataset.
 
     Parameters
     ---------------------------------------
-    genome: str = "hg19",
-        considered genome version. Currently supported only "hg19".
+    root: str,
+        Where to store / load from the downloaded data.
 
     Returns
     ---------------------------------------
     Return dataframe with the supported cell lines mapped to FANTOM name.
     """
-    info = load_info("fantom_data")
-    download(info[genome]["cell_lines"], "fantom_data")
-    df = pd.read_csv("fantom_data/{filename}".format(
-        filename=info[genome]["cell_lines"].split("/")[-1]
-    ), sep="\t", header=None)
+    info = compress_json.local_load("fantom.json")
+    path = f"{root}/cell_lines.tsv"
+    download(info["cell_lines"], path, cache=True)
+    df = pd.read_csv(
+        path,
+        sep="\t",
+        header=None
+    )
     cell_lines_names = df[0].str.split("cell line:", expand=True)
     cell_lines_names[1][
         cell_lines_names[0].str.startswith("H1") &
@@ -47,15 +54,15 @@ def fantom_available_cell_lines(genome: str = "hg19") -> pd.DataFrame:
     return cell_lines_codes.reset_index(drop=True).groupby("cell_line").first().reset_index()
 
 
-def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
+def filter_cell_lines(root: str, cell_lines: List[str]) -> pd.DataFrame:
     """Return FANTOM cell lines names for given cell lines.
 
     Parameters
     ---------------------------------------
+    root: str,
+        Where to store / load from the downloaded data.
     cell_lines: List[str],
         list of cell lines to be considered.
-    genome: str,
-        considered genome version. Currently supported only "hg19".
 
     Raises
     ---------------------------------------
@@ -66,7 +73,7 @@ def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
     ---------------------------------------
     Return dataframe with the cell lines mapped to FANTOM name.
     """
-    return filter_required_cell_lines(cell_lines, fantom_available_cell_lines(genome))
+    return filter_required_cell_lines(cell_lines, fantom_available_cell_lines(root))
 
 
 def average_cell_lines(cell_lines_names: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
@@ -90,76 +97,81 @@ def average_cell_lines(cell_lines_names: pd.DataFrame, data: pd.DataFrame) -> pd
     return data.drop(columns=data.columns[data.columns.str.startswith("CNhs")])
 
 
-def drop_always_inactives(data: pd.DataFrame, cell_lines: List[str], threshold: float) -> pd.DataFrame:
-    """Drops the rows where no activation is present for any of the cell lines.
-
-    Datapoints are considered active when they are ABOVE the threshold.
+def load_matrix(root: str, genome: str, region: str, info: Dict, nrows: int) -> pd.DataFrame:
+    """Return the matrix with the CAGE peaks data.
 
     Parameters
-    -----------------------------------
-    data: pd.DataFrame, the data to be considered.
-    cell_lines: List[str, list of cell lines to be considered.
-    threshold: float, the activation threshold.
+    ----------------------
+    root: str,
+        Root where to store the downloaded data.
+    genome: str,
+        Genomic assembly.
+    region: str,
+        Name of the regions to consider.
+    info: Dict,
+        URls data.
+    nrows: int= None,
+        the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Returns
-    -----------------------------------
-    The dataset without the inactive rows.
+    ----------------------
+    Pandas dataframe with CAGE peaks data.
     """
-    return data[(data[cell_lines] > threshold).any(axis=1)]
-
-
-def normalize_promoters_annotation(annotations: pd.Series) -> pd.DataFrame:
-    first_value = annotations.iloc[0]
-    lifted_from_hg19 = annotations.str.contains("hg19")
-    if "::" in first_value:
-        # In the hg38 CAGE Peaks files for the promoters from FANTOM5
-        # there is an additional notation `hg19::` at the start of the
-        # index metadata that needs to be removed.
-        annotations = annotations.str.split("::").str[1]
-    if ";" in first_value:
-        # In the hg38 CAGE Peaks files for the promoters from FANTOM5
-        # there is an additional notation `;hg_1.1` at the end of the
-        #  that needs to be removed.
-        annotations = annotations.str.split(";").str[0]
-    annotations = annotations.str.replace(r"\.\.", ",")
-    annotations = annotations.str.replace(":", ",")
-    annotations = annotations.str.split(",", expand=True)
-    annotations.columns = ["chromosome", "start", "end", "strand"]
-    annotations["start"] = annotations["start"].astype(int)
-    annotations["end"] = annotations["end"].astype(int)
-    annotations["lifted"] = lifted_from_hg19
-
-    return annotations
+    matrix_path = f"{root}/{genome}/{region}/matrix.tsv.gz"
+    bed_path = f"{root}/{genome}/{region}/regions.bed.gz"
+    download(info[genome][region]["matrix"], matrix_path, cache=True)
+    download(info[genome][region]["bed"], bed_path, cache=True)
+    if region == "promoters":
+        nrows += 2
+    matrix = pd.read_csv(
+        matrix_path,
+        comment="#",
+        sep="\t",
+        low_memory=False,
+        nrows=nrows
+    )
+    if region == "promoters":
+        matrix.drop(index=[0, 1], inplace=True)
+        matrix.reset_index(drop=True, inplace=True)
+    matrix.set_index(matrix.columns[0], inplace=True)
+    bed = load_bed(bed_path)
+    bed.set_index("name", inplace=True)
+    matrix = pd.concat(
+        [
+            bed.loc[matrix.index],
+            matrix
+        ],
+        axis=1
+    )
+    matrix.reset_index(drop=True, inplace=True)
+    return matrix
 
 
 def filter_promoters(
+    root: str,
     cell_lines: List[str],
     cell_lines_names: pd.DataFrame,
     genome: str,
     info: Dict,
-    window_size: int,
-    threshold: float,
-    drop_always_inactive_rows: bool,
+    window_sizes: List[int],
     nrows: int
-):
+) -> Generator:
     """Return DataFrame containing the promoters filtered for given cell lines and adapted to given window size.
 
     Parameters
     ---------------------------------------
+    root: str,
+        Directory where to store / load the downloaded data.
     cell_lines: List[str],
         list of cell lines to be considered.
     cell_lines_names: pd.DataFrame,
         DataFrame containing FANTOM map from cell line name to FANTOM code.
     genome: str,
-        considered genome version. Currently supported only "hg19".
-    window_size: int,
+        considered genome version.
+    info: Dict,
+        URLs from where to retrieve the data.
+    window_sizes: List[int],
         window size to use for the various regions.
-    center_enhancers: str,
-        how to center the enhancer window, either around "peak" or the "center" of the region.
-    threshold:float,
-        activation threshold.
-    drop_always_inactive_rows:bool= True,
-        whetever to drop the rows where no activation is detected for every rows.
     nrows:int=None,
         the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
@@ -167,96 +179,77 @@ def filter_promoters(
     ---------------------------------------
     DataFrame containing filtered promoters.
     """
-    download(info[genome]["promoters"], "fantom_data")
-    promoters = pd.read_csv(
-        "fantom_data/{filename}".format(
-            filename=info[genome]["promoters"].split("/")[-1]
-        ),
-        comment="#",
-        sep="\t",
-        nrows=nrows,
-        low_memory=False
-    ).drop(index=[0, 1]).reset_index(drop=True)
-    promoters = promoters.drop(columns=[
-        c for c in promoters.columns
-        if c.endswith("_id")
-    ])
+    # Load the data matrix
+    promoters = load_matrix(
+        root,
+        genome,
+        "promoters",
+        info,
+        nrows
+    )
+
+    # Filter columns not relative to CAGE features
+    promoters.drop(
+        columns=[
+            c
+            for c in promoters.columns
+            if c.endswith("_id")
+        ],
+        inplace=True
+    )
     promoters.columns = [
-        c.split(".")[2] if c.startswith("tpm") else c for c in promoters.columns
+        c.split(".")[2]
+        if c.startswith("tpm") else c
+        for c in promoters.columns
     ]
+
+    # Keep only the lines relative to promoters
     promoters = promoters[promoters.description.str.endswith("end")]
-    promoters = pd.concat([
-        promoters,
-        normalize_promoters_annotation(promoters["00Annotation"])
-    ], axis=1)
+
+    # Handle the strand-related window size.
     positive_strand = promoters.strand == "+"
     negative_strand = promoters.strand == "-"
-    promoters.loc[promoters.index[positive_strand],
-                  "start"] = promoters[positive_strand]["end"] - window_size
-    promoters.loc[promoters.index[negative_strand],
-                  "end"] = promoters[negative_strand]["start"] + window_size
-    promoters = average_cell_lines(cell_lines_names, promoters)
-    if drop_always_inactive_rows:
-        promoters = drop_always_inactives(promoters, cell_lines, threshold)
-    return promoters
 
-
-def load_enhancers_coordinates(genome: str, info: Dict) -> pd.DataFrame:
-    """Return enhancers coordinates informations.
-
-    Parameters
-    ---------------------------------------
-    genome: str,
-        considered genome version. Currently supported only "hg19".
-    info: Dict,
-        informations for FANTOM dataset.
-
-    Returns
-    ---------------------------------------
-    Dataset containing the enhancers coordinates informations.
-    """
-    download(info[genome]["enhancers_info"], "fantom_data")
-    return pd.read_csv(
-        "fantom_data/{filename}".format(
-            filename=info[genome]["enhancers_info"].split("/")[-1]
-        ),
-        sep="\t",
-        header=None,
-        names=["chromosome", "start", "end", "name", "score", "strand",
-               "thickStart", "thickEnd", "itemRgb", "blockCount", "blockSizes", "blockStarts"],
-        low_memory=False
-    )
+    # For each window size required we yield the promoters
+    for window_size in window_sizes:
+        current = promoters.copy()
+        current.loc[current.index[positive_strand],
+                    "start"] = current[positive_strand]["end"] - window_size
+        current.loc[current.index[negative_strand],
+                    "end"] = current[negative_strand]["start"] + window_size
+        yield current
 
 
 def filter_enhancers(
+    root: str,
     cell_lines: List[str],
     cell_lines_names: pd.DataFrame,
     genome: str,
     info: Dict,
-    window_size: int,
+    window_sizes: List[int],
     center_mode: str,
-    threshold: float,
-    drop_always_inactive_rows: bool,
     nrows: int
-) -> pd.DataFrame:
+) -> Generator:
     """Return DataFrame containing the enhancers filtered for given cell lines and adapted to given window size.
 
     Parameters
     ---------------------------------------
+    root: str,
+        Path where to store / load data.
     cell_lines: List[str],
         list of cell lines to be considered.
     cell_lines_names: pd.DataFrame,
         DataFrame containing FANTOM map from cell line name to FANTOM code.
     genome: str,
-        considered genome version. Currently supported only "hg19".
-    window_size: int,
+        considered genome version.
+    window_sizes: List[int],
         window size to use for the various regions.
     center_enhancers: str,
         how to center the enhancer window, either around "peak" or the "center" of the region.
-    threshold:float,
+    threshold: float,
         activation threshold.
-    drop_always_inactive_rows:bool= True,
-        whetever to drop the rows where no activation is detected for every rows.
+    binarize: bool,
+        Wether to binarize the labels.
     nrows:int=None,
         the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
@@ -264,63 +257,53 @@ def filter_enhancers(
     ---------------------------------------
     DataFrame containing filtered enhancers.
     """
-    download(info[genome]["enhancers"], "fantom_data")
-    enhancers = pd.read_csv(
-        "fantom_data/{filename}".format(
-            filename=info[genome]["enhancers"].split("/")[-1]
-        ),
-        comment="#",
-        sep="\t",
-        nrows=nrows,
-        low_memory=False
+    # Load the enhancers data
+    enhancers = load_matrix(
+        root,
+        genome,
+        "enhancers",
+        info,
+        nrows
     )
-    coordinates = load_enhancers_coordinates(genome, info)
-    enhancers["start"] = coordinates.start
-    enhancers["end"] = coordinates.end
-    enhancers = center_window(
-        enhancers,
-        window_size,
-        coordinates.thickStart if center_mode == "peak" else None
-    )
-    enhancers["chromosome"] = coordinates.chromosome
-    enhancers = average_cell_lines(cell_lines_names, enhancers)
-    if drop_always_inactive_rows:
-        enhancers = drop_always_inactives(enhancers, cell_lines, threshold)
-    return enhancers
+    # Center the windows for each window size.
+    for window_size in window_sizes:
+        yield center_window(
+            enhancers.copy(),
+            window_size,
+            enhancers.thickStart if center_mode == "peak" else None
+        )
 
 
 def fantom(
     cell_lines: Union[List[str], str],
-    window_size: int,
+    window_sizes: Union[List[int], int],
+    root: str = "fantom",
     genome: str = "hg19",
     center_enhancers: str = "peak",
     enhancers_threshold: float = 0,
     promoters_threshold: float = 5,
-    drop_always_inactive_rows: bool = True,
     binarize: bool = True,
     nrows: int = None
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> Generator:
     """Runs the pipeline over the fantom raw CAGE data.
 
     Parameters
     ---------------------------------------
     cell_lines: List[str],
         list of cell lines to be considered.
-    window_size: int,
-        window size to use for the various regions.
+    window_size: Union[List[int], int],
+        Either window size or list of to use for the various regions.
     genome: str= "hg19",
-        considered genome version. Currently supported only "hg19".
+        considered genome version.
     center_enhancers: str= "peak",
         how to center the enhancer window, either around "peak" or the "center" of the region.
     enhancers_threshold:float= 0,
         activation threshold for the enhancers.
     promoters_threshold:float= 5,
         activation threshold for the promoters.
-    drop_always_inactive_rows:bool= True,
-        whetever to drop the rows where no activation is detected for every rows.
     binarize: bool= True,
         Whetever to return the data binary-encoded, zero for inactive, one for active.
-    nrows:int=None,
+    nrows: int= None,
         the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Raises
@@ -348,46 +331,53 @@ def fantom(
     """
     if isinstance(cell_lines, str):
         cell_lines = [cell_lines]
-    info = load_info("fantom_data")
-    validate_common_parameters(cell_lines, window_size, genome, nrows, info)
-    cell_lines = normalize_cell_lines(cell_lines)
+    if isinstance(window_sizes, int):
+        window_sizes = [window_sizes]
+
     for threshold in (enhancers_threshold, promoters_threshold):
         if not isinstance(threshold, (float, int)) or threshold < 0:
             raise ValueError("Threshold must be a positive real number.")
+
     if center_enhancers not in ("peak", "center"):
         raise ValueError("The given center_enhancers option {center_enhancers} is not supported.".format(
             center_enhancers=center_enhancers
         ))
 
-    cell_lines_names = filter_cell_lines(cell_lines, genome)
-    enhancers = filter_enhancers(
+    info = compress_json.local_load("fantom.json")
+    validate_common_parameters(cell_lines, window_sizes, genome, info)
+    cell_lines = normalize_cell_lines(cell_lines)
+    cell_lines_names = filter_cell_lines(root, cell_lines)
+
+    enhancers_generator = filter_enhancers(
+        root=root,
         cell_lines=cell_lines,
         cell_lines_names=cell_lines_names,
         genome=genome,
         info=info,
-        window_size=window_size,
+        window_sizes=window_sizes,
         center_mode=center_enhancers,
-        threshold=enhancers_threshold,
-        drop_always_inactive_rows=drop_always_inactive_rows,
         nrows=nrows
-    ).reset_index(drop=True)
-    promoters = filter_promoters(
+    )
+
+    promoters_generator = filter_promoters(
+        root=root,
         cell_lines=cell_lines,
         cell_lines_names=cell_lines_names,
         genome=genome,
         info=info,
-        window_size=window_size,
-        threshold=promoters_threshold,
-        drop_always_inactive_rows=drop_always_inactive_rows,
+        window_sizes=window_sizes,
         nrows=nrows
-    ).reset_index(drop=True)
+    )
 
-    if binarize:
-        enhancers[cell_lines] = (enhancers[cell_lines]
-                                 > enhancers_threshold).astype(int)
-        promoters[cell_lines] = (promoters[cell_lines]
-                                 > promoters_threshold).astype(int)
-
-    enhancers = normalize_bed_file(cell_lines, enhancers)
-    promoters = normalize_bed_file(cell_lines, promoters)
-    return enhancers, promoters
+    for enhancers, promoters in zip(enhancers_generator, promoters_generator):
+        for regions, threshold in (
+            (enhancers, enhancers_threshold),
+            (promoters, promoters_threshold),
+        ):
+            average_cell_lines(cell_lines_names, regions)
+            regions = normalize_bed_file(
+                cell_lines,
+                regions
+            )
+            regions[cell_lines] = (regions[cell_lines] > threshold).astype(int)
+        yield enhancers, promoters

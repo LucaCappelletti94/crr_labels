@@ -1,35 +1,37 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 import warnings
 import pandas as pd
+import compress_json
+from encodeproject import download
 from tqdm.auto import tqdm
 
-from .utils import (center_window, download, filter_required_cell_lines,
-                    load_info, normalize_bed_file, normalize_cell_lines,
+from .utils import (center_window, filter_required_cell_lines,
+                    normalize_bed_file, normalize_cell_lines,
                     validate_common_parameters)
 
 
-def roadmap_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
+def roadmap_available_cell_lines(root: str) -> pd.DataFrame:
     """Return Roadmap supported available cell lines.
 
     Parameters
     ---------------------------------------
-    genome: str = "hg19",
-        considered genome version. Currently supported only "hg19".
+    root: str,
+        Where to store / load from the downloaded data.
 
     Returns
     ---------------------------------------
     Return dataframe with the cell lines supported available in Roadmap dataset.
     """
-    info = load_info("roadmap_data")
-    download(info[genome]["cell_lines"], "roadmap_data")
+    info = compress_json.local_load("roadmap.json")
+    filename = f"{root}/cell_lines.tsv"
+    download(info["cell_lines"], filename, cache=True)
     cell_lines_codes = pd.read_csv(
-        "roadmap_data/{path}".format(
-            path=info[genome]["cell_lines"].split("/")[-1]
-        ),
+        filename,
         sep="\t"
     )
     cell_lines_codes = cell_lines_codes[
-        (cell_lines_codes.TYPE != "ESCDerived") & cell_lines_codes.GROUP.isin(["ENCODE2012", "ESC", "IMR90"])
+        (cell_lines_codes.TYPE != "ESCDerived") & cell_lines_codes.GROUP.isin(
+            ["ENCODE2012", "ESC", "IMR90"])
     ]
     cell_lines_codes["cell_line"] = cell_lines_codes.MNEMONIC.str.split(
         ".").str[1].str.replace("-", "")
@@ -37,15 +39,15 @@ def roadmap_available_cell_lines(genome: str= "hg19") -> pd.DataFrame:
     return cell_lines_codes[["cell_line", "code"]].reset_index(drop=True)
 
 
-def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
+def filter_cell_lines(root: str, cell_lines: List[str]) -> pd.DataFrame:
     """Return Roadmap cell lines names for given cell lines.
 
     Parameters
     ---------------------------------------
+    root: str,
+        Where to store / load from the downloaded data.
     cell_lines: List[str],
         list of cell lines to be considered.
-    genome: str,
-        considered genome version. Currently supported only "hg19".
 
     Raises
     ---------------------------------------
@@ -56,15 +58,18 @@ def filter_cell_lines(cell_lines: List[str], genome: str) -> pd.DataFrame:
     ---------------------------------------
     Return dataframe with the cell lines mapped to Roadmap name.
     """
-    return filter_required_cell_lines(cell_lines, roadmap_available_cell_lines(genome))
+    return filter_required_cell_lines(cell_lines, roadmap_available_cell_lines(root))
 
 
 def get_cell_line(
+    root: str,
     cell_line: str,
     states: int,
+    genome: str,
     enhancers_labels: List[str],
     promoters_labels: List[str],
-    url: str
+    url: str,
+    nrows: int
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Return enhancers and promoters for given cell line.
 
@@ -80,17 +85,17 @@ def get_cell_line(
         The labels to use for active promoters.
     url: str
         Url for downloading the chosen cell line.
+    nrows: int,
+        the number of rows to read, usefull when testing pipelines for creating smaller datasets.
 
     Returns
     ------------------------------------
     Return tuple containing the dataframe of the enhancers
     and the dataframe of the promoters for the given cell line.
     """
-    root = "roadmap_data/{states}".format(states=states)
-    path = "{cell_line}.bed.gz".format(cell_line=cell_line)
-
+    path = f"{root}/{genome}/{states}/{cell_line}.bed.gz"
     try:
-        download(url, root, path)
+        download(url, path, cache=True)
     except ValueError:
         warnings.warn(
             "Unable to retrieve the data relative to cell line {}".format(
@@ -101,20 +106,20 @@ def get_cell_line(
         return None, None
 
     roadmap_data = pd.read_csv(
-        "{root}/{path}".format(
-            root=root,
-            path=path
-        ),
+        path,
         sep="\t",
         skiprows=[0, 1],
         header=None,
-        names=["chromosome", "start", "end", cell_line]
+        names=["chromosome", "start", "end", cell_line],
+        nrows=nrows
     )
 
     roadmap_data = roadmap_data.set_index(["chromosome", "start", "end"])
 
-    enhancers = roadmap_data[roadmap_data[cell_line].isin(enhancers_labels)].copy()
-    promoters = roadmap_data[roadmap_data[cell_line].isin(promoters_labels)].copy()
+    enhancers = roadmap_data[roadmap_data[cell_line].isin(
+        enhancers_labels)].copy()
+    promoters = roadmap_data[roadmap_data[cell_line].isin(
+        promoters_labels)].copy()
     enhancers[cell_line] = 1  # Encode active enhancers as 1
     promoters[cell_line] = 1  # Encode active promoters as 1
 
@@ -125,6 +130,7 @@ def roadmap(
     cell_lines: Union[List[str], str],
     window_size: int,
     genome: str = "hg19",
+    root: str = "roadmap",
     states: int = 18,
     enhancers_labels: List[str] = ("7_Enh", "9_EnhA1", "10_EnhA2"),
     promoters_labels: List[str] = ("1_TssA",),
@@ -171,8 +177,8 @@ def roadmap(
     Tuple containining dataframes informations for enhancers and promoters for chosen cell lines.
     """
 
-    info = load_info("roadmap_data")
-    validate_common_parameters(cell_lines, window_size, genome, nrows, info)
+    info = compress_json.local_load("roadmap.json")
+    validate_common_parameters(cell_lines, [window_size], genome, info)
     cell_lines = normalize_cell_lines(cell_lines)
     if str(states) not in info[genome]["states_model"]:
         raise ValueError("The model with {states} states is not currently supported with given genome {genome}.".format(
@@ -181,8 +187,8 @@ def roadmap(
         ))
 
     cell_lines_names = filter_cell_lines(
+        root,
         cell_lines,
-        genome
     )
 
     url = info[genome]["states_model"][str(states)]
@@ -193,11 +199,14 @@ def roadmap(
             desc="Cell lines"
         )
         for enhancers, promoters in (get_cell_line(
+            root,
             cell_line,
             states,
+            genome,
             enhancers_labels,
             promoters_labels,
-            url.format(code=code)
+            url.format(code=code),
+            nrows
         ),)
         if enhancers is not None and promoters is not None
     ]))
@@ -216,9 +225,5 @@ def roadmap(
 
     enhancers = normalize_bed_file(cell_lines, enhancers)
     promoters = normalize_bed_file(cell_lines, promoters)
-
-    if nrows is not None:
-        enhancers = enhancers.head(nrows)
-        promoters = promoters.head(nrows)
 
     return enhancers, promoters
