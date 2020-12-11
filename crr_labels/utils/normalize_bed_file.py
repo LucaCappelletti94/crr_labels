@@ -25,11 +25,10 @@ def normalize_bed_file(cell_lines: List[str], bed_file: pd.DataFrame) -> pd.Data
         for cell_line in cell_lines
         if cell_line in bed_file.columns
     ]
-    df = bed_file[["chromosome", "start",
+    df = bed_file[["chrom", "start",
                    "end", "strand", *sorted(cell_lines), "lifted"]]
     return df.rename(
         columns={
-            "chromosome": "chrom",
             "start": "chromStart",
             "end": "chromEnd"
         }

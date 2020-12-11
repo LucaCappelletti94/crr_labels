@@ -110,11 +110,11 @@ def get_cell_line(
         sep="\t",
         skiprows=[0, 1],
         header=None,
-        names=["chromosome", "start", "end", cell_line],
+        names=["chrom", "start", "end", cell_line],
         nrows=nrows
     )
 
-    roadmap_data = roadmap_data.set_index(["chromosome", "start", "end"])
+    roadmap_data = roadmap_data.set_index(["chrom", "start", "end"])
 
     enhancers = roadmap_data[roadmap_data[cell_line].isin(
         enhancers_labels)].copy()

@@ -17,7 +17,7 @@ def load_bed(path: str) -> pd.DataFrame:
         path,
         sep="\t",
         header=None,
-        names=["chromosome", "start", "end", "name", "score", "strand",
+        names=["chrom", "start", "end", "name", "score", "strand",
                "thickStart", "thickEnd", "itemRgb", "blockCount", "blockSizes", "blockStarts"],
         low_memory=False
     )
