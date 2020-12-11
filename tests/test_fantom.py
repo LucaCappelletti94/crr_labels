@@ -12,7 +12,7 @@ def test_fantom():
         for center_enhancers in tqdm(("peak", "center"), leave=False, desc="Enhancer centering"):
             for binarize in tqdm((True, False), leave=False, desc="Binarization option"):
                 window_size = 10
-                for _ in fantom(
+                for enhancers, promoters in fantom(
                     "HelaS3",
                     window_size,
                     root="fantom_test",

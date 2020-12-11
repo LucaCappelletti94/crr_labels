@@ -370,14 +370,16 @@ def fantom(
     )
 
     for enhancers, promoters in zip(enhancers_generator, promoters_generator):
-        for regions, threshold in (
+        regions = []
+        for crrs, threshold in (
             (enhancers, enhancers_threshold),
             (promoters, promoters_threshold),
         ):
-            average_cell_lines(cell_lines_names, regions)
-            regions = normalize_bed_file(
+            average_cell_lines(cell_lines_names, crrs)
+            crrs = normalize_bed_file(
                 cell_lines,
-                regions
+                crrs
             )
-            regions[cell_lines] = (regions[cell_lines] > threshold).astype(int)
-        yield enhancers, promoters
+            crrs[cell_lines] = (crrs[cell_lines] > threshold).astype(int)
+            regions.append(crrs)
+        yield regions
