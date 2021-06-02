@@ -6,13 +6,13 @@ import pandas as pd
 
 
 def fantom_available_cell_lines(
-    root: str,
+    root: str = "fantom",
 ) -> pd.DataFrame:
     """Return supported cell lines available within FANTOM dataset.
 
     Parameters
     ---------------------------------------
-    root: str,
+    root: str = "fantom",
         Where to store / load from the downloaded data.
 
     Returns
@@ -278,7 +278,7 @@ def fantom(
     cell_lines: Union[List[str], str],
     window_sizes: Union[List[int], int],
     root: str = "fantom",
-    genome: str = "hg19",
+    genome: str = "hg38",
     center_enhancers: str = "peak",
     enhancers_threshold: float = 0,
     promoters_threshold: float = 5,
@@ -293,7 +293,7 @@ def fantom(
         list of cell lines to be considered.
     window_size: Union[List[int], int],
         Either window size or list of to use for the various regions.
-    genome: str= "hg19",
+    genome: str= "hg38",
         considered genome version.
     center_enhancers: str= "peak",
         how to center the enhancer window, either around "peak" or the "center" of the region.
@@ -380,6 +380,7 @@ def fantom(
                 cell_lines,
                 crrs
             )
-            crrs[cell_lines] = (crrs[cell_lines] > threshold).astype(int)
+            if binarize:
+                crrs[cell_lines] = (crrs[cell_lines] > threshold).astype(int)
             regions.append(crrs)
         yield regions
