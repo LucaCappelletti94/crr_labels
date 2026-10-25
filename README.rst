@@ -1,6 +1,6 @@
 crr_labels
 =========================================================================================
-|travis| |sonar_quality| |sonar_maintainability| |codacy| |code_climate_maintainability| |pip| |downloads|
+|travis| |codacy| |code_climate_maintainability| |pip| |downloads|
 
 Python package wrapping over FANTOM and Roadmap labels for cis-regulatory regions.
 
@@ -16,7 +16,7 @@ Tests Coverage
 ----------------------------------------------
 Since some software handling coverages sometimes get slightly different results, here's three of them:
 
-|coveralls| |sonar_coverage| |code_climate_coverage|
+|coveralls| |code_climate_coverage|
 
 Usage examples
 -----------------------------------------------
@@ -96,18 +96,6 @@ TODO: The updated processed labels will be added as soon as we decide on the new
 .. |travis| image:: https://travis-ci.org/LucaCappelletti94/crr_labels.png
    :target: https://travis-ci.org/LucaCappelletti94/crr_labels
    :alt: Travis CI build
-
-.. |sonar_quality| image:: https://sonarcloud.io/api/project_badges/measure?project=LucaCappelletti94_crr_labels&metric=alert_status
-    :target: https://sonarcloud.io/dashboard/index/LucaCappelletti94_crr_labels
-    :alt: SonarCloud Quality
-
-.. |sonar_maintainability| image:: https://sonarcloud.io/api/project_badges/measure?project=LucaCappelletti94_crr_labels&metric=sqale_rating
-    :target: https://sonarcloud.io/dashboard/index/LucaCappelletti94_crr_labels
-    :alt: SonarCloud Maintainability
-
-.. |sonar_coverage| image:: https://sonarcloud.io/api/project_badges/measure?project=LucaCappelletti94_crr_labels&metric=coverage
-    :target: https://sonarcloud.io/dashboard/index/LucaCappelletti94_crr_labels
-    :alt: SonarCloud Coverage
 
 .. |coveralls| image:: https://coveralls.io/repos/github/LucaCappelletti94/crr_labels/badge.svg?branch=master
     :target: https://coveralls.io/github/LucaCappelletti94/crr_labels?branch=master
